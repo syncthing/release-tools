@@ -1,0 +1,8 @@
+# rsync destination for APT archive
+export RELEASE_ROOT="user@server:/path"
+# location of Syncthing secret EC key
+export PRIVATE_KEY="~/secret/key.priv"
+# GitHub token for uploads
+export GITHUB_TOKEN="abcdef0123456789abcdef0123456789abcdef01"
+# "rsh" command for rsync
+export RSYNC_RSH_CMD="ssh -p 2443"

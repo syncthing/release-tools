@@ -1,0 +1,64 @@
+#!/bin/bash
+set -euo pipefail
+
+export TMPDIR=/var/tmp
+workdir=$(mktemp -d)
+echo Working dir is "$workdir"
+pushd "$workdir"
+
+dlbuild -match '\.tar\.gz|\.zip' http://build.syncthing.net/job/syncthing-release/lastSuccessfulBuild
+dlbuild -match '\.tar\.gz|\.zip' http://build.syncthing.net/job/syncthing-release-windows/lastSuccessfulBuild
+dlbuild -match '\.tar\.gz|\.zip' http://build.syncthing.net/job/syncthing-release-mac/lastSuccessfulBuild
+ver=(syncthing-linux-amd64-*.tar.gz)
+ver="${ver#syncthing-linux-amd64-}"
+ver="${ver%.tar.gz}"
+echo Release version $ver
+
+for f in *.tar.gz; do
+	base="${f%.tar.gz}"
+	tar zxf "$f"
+	if [ -f "$base/syncthing" ] ; then
+		echo Signing "$base"
+		mkdir "$base/.metadata"
+		stsigtool sign "$PRIVATE_KEY" "$base/syncthing" > "$base/syncthing.sig"
+		( echo "$f"; cat "$base/syncthing" ) | stsigtool sign "$PRIVATE_KEY" > "$base/.metadata/release.sig"
+		tar zcf "$f" "$base"
+		rm -rf "$base"
+		rm -rf syncthing
+	fi
+done
+
+for f in *.zip; do
+	base="${f%.zip}"
+	unzip -q "$f"
+	if [ -f "$base/syncthing.exe" ] ; then
+		echo Signing "$base"
+		mkdir "$base/metadata"
+		stsigtool sign "$PRIVATE_KEY" "$base/syncthing.exe" > "$base/syncthing.exe.sig"
+		( echo "$f"; cat "$base/syncthing.exe" ) | stsigtool sign "$PRIVATE_KEY" > "$base/metadata/release.sig"
+		rm -f "$f"
+		zip -q -r "$f" "$base"
+		rm -rf "$base"
+	fi
+done
+
+files=(*.tar.gz *.zip)
+
+sha1sum "${files[@]}" | gpg --clearsign >sha1sum.txt.asc
+sha256sum "${files[@]}" | gpg --clearsign >sha256sum.txt.asc
+
+for f in sha1sum.txt.asc sha256sum.txt.asc  "${files[@]}" ; do
+	relup syncthing/syncthing "$ver" "$f"
+done
+
+
+echo
+echo If everything went well, hit enter to delete temporary files.
+echo If there were upload errors, hit ^C, go to "$workdir"
+echo "and retry upload by \"relup syncthing/syncthing "$ver" <filename>\"."
+echo It may be necessary to manually delete the broken upload from Github.
+read
+
+popd
+rm -rf "$workdir"
+

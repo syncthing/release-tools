@@ -1,0 +1,42 @@
+#!/bin/bash
+set -euo pipefail
+
+export TMPDIR=/var/tmp
+workdir=$(mktemp -d)
+echo Working dir is "$workdir"
+pushd "$workdir" >/dev/null
+
+echo Downloading release
+dlbuild -match '\.deb' http://build.syncthing.net/job/syncthing-release-debian/lastSuccessfulBuild
+
+ver=(syncthing_*_amd64.deb)
+ver="${ver#syncthing_}"
+ver="${ver%_amd64.deb}"
+echo Release version $ver
+
+for arch in amd64 armel armhf i386 ; do
+	mv "syncthing_${ver}_${arch}.deb" "$HOME/apt-dists/dists/syncthing/release/binary-$arch"
+done
+
+popd >/dev/null
+rm -r "$workdir"
+
+pushd "$HOME/apt-dists" >/dev/null
+
+echo Cleaning out old releases
+find dists/syncthing/release -name syncthing_\*.deb -mtime +30 -delete
+
+echo Generating and signing package archives
+for f in dists/syncthing/release/binary-* ; do
+	apt-ftparchive packages "$f" > "$f/Packages.new"
+	mv "$f/Packages.new"  "$f/Packages"
+	gzip -c "$f/Packages" > "$f/Packages.gz"
+done
+
+apt-ftparchive -c Releases.conf release dists/syncthing | gpg --clearsign > dists/syncthing/InRelease
+apt-ftparchive -c Releases.conf release dists/syncthing > dists/syncthing/Release
+gpg --detach-sign --yes -a -o dists/syncthing/Release.gpg dists/syncthing/Release
+
+echo Uploading new distribution
+rsync -va --delete --rsh="$RSYNC_RSH_CMD" dists/ "$RELEASE_ROOT/dists/"
+
