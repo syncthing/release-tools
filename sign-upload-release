@@ -46,8 +46,9 @@ files=(*.tar.gz *.zip)
 
 sha1sum "${files[@]}" | gpg --clearsign >sha1sum.txt.asc
 sha256sum "${files[@]}" | gpg --clearsign >sha256sum.txt.asc
+gpg --sign --armour --detach syncthing-source-*.tar.gz
 
-for f in sha1sum.txt.asc sha256sum.txt.asc  "${files[@]}" ; do
+for f in *.asc  "${files[@]}" ; do
 	relup syncthing/syncthing "$ver" "$f"
 done
 
