@@ -1,0 +1,34 @@
+#!/bin/bash
+set -euo pipefail
+
+export TMPDIR=/var/tmp
+workdir=$(mktemp -d)
+echo Working dir is "$workdir"
+pushd "$workdir"
+
+dlbuild -match '\.tar\.gz|\.zip' http://build.syncthing.net/job/discosrv/lastSuccessfulBuild
+ver=(discosrv-linux-amd64-*.tar.gz)
+ver="${ver#discosrv-linux-amd64-}"
+ver="${ver%.tar.gz}"
+echo Release version $ver
+
+files=(*.tar.gz *.zip)
+
+sha1sum "${files[@]}" | gpg --clearsign >sha1sum.txt.asc
+sha256sum "${files[@]}" | gpg --clearsign >sha256sum.txt.asc
+
+for f in *.asc  "${files[@]}" ; do
+	relup syncthing/discosrv "$ver" "$f"
+done
+
+
+echo
+echo If everything went well, hit enter to delete temporary files.
+echo If there were upload errors, hit ^C, go to "$workdir"
+echo "and retry upload by \"relup syncthing/discosrv "$ver" <filename>\"."
+echo It may be necessary to manually delete the broken upload from Github.
+read
+
+popd
+rm -rf "$workdir"
+

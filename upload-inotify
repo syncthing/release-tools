@@ -35,5 +35,5 @@ apt-ftparchive -c Releases.conf release dists/syncthing > dists/syncthing/Releas
 gpg --detach-sign --yes -a -o dists/syncthing/Release.gpg dists/syncthing/Release
 
 echo Uploading new distribution
-rsync -va --delete --rsh="$RSYNC_RSH_CMD" dists/ "$RELEASE_ROOT" /dists/
+rsync -va --delete --rsh="$RSYNC_RSH_CMD" dists/ "$RELEASE_ROOT/dists/"
 
