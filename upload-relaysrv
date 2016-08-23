@@ -6,9 +6,9 @@ workdir=$(mktemp -d)
 echo Working dir is "$workdir"
 pushd "$workdir"
 
-dlbuild -match '\.tar\.gz|\.zip' http://build.syncthing.net/job/relaysrv/lastSuccessfulBuild
-ver=(relaysrv-linux-amd64-*.tar.gz)
-ver="${ver#relaysrv-linux-amd64-}"
+dlbuild -match '\.tar\.gz|\.zip' http://build.syncthing.net/job/strelaysrv/lastSuccessfulBuild
+ver=(strelaysrv-linux-amd64-*.tar.gz)
+ver="${ver#strelaysrv-linux-amd64-}"
 ver="${ver%.tar.gz}"
 echo Release version $ver
 

@@ -6,9 +6,9 @@ workdir=$(mktemp -d)
 echo Working dir is "$workdir"
 pushd "$workdir"
 
-dlbuild -match '\.tar\.gz|\.zip' http://build.syncthing.net/job/discosrv/lastSuccessfulBuild
-ver=(discosrv-linux-amd64-*.tar.gz)
-ver="${ver#discosrv-linux-amd64-}"
+dlbuild -match '\.tar\.gz|\.zip' http://build.syncthing.net/job/stdiscosrv/lastSuccessfulBuild
+ver=(stdiscosrv-linux-amd64-*.tar.gz)
+ver="${ver#stdiscosrv-linux-amd64-}"
 ver="${ver%.tar.gz}"
 echo Release version $ver
 
