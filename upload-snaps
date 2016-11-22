@@ -1,0 +1,20 @@
+#!/bin/bash
+set -euo pipefail
+
+export TMPDIR=/var/tmp
+workdir=$(mktemp -d)
+echo Working dir is "$workdir"
+pushd "$workdir"
+
+dlbuild -match '\.snap' http://build.syncthing.net/job/syncthing-release/lastSuccessfulBuild
+channel=${1:-candidate}
+
+for snap in *.snap ; do
+	snapcraft push "$snap"
+	latestRevision=$(snapcraft history syncthing | grep -v ^Rev | head -n1 | cut -d ' ' -f 1)
+	snapcraft release syncthing "$latestRevision" "$channel"
+done
+
+popd
+rm -rf "$workdir"
+
