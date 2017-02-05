@@ -12,10 +12,16 @@ dlbuild -match '\.deb' http://build.syncthing.net/job/syncthing-release/lastSucc
 ver=(syncthing_*_amd64.deb)
 ver="${ver#syncthing_}"
 ver="${ver%_amd64.deb}"
-echo Release version $ver
+
+dist="release"
+if [[ $ver == *-* ]] ; then
+	dist="candidate"
+fi
+
+echo Version $ver will go into $dist
 
 for arch in amd64 armel armhf i386 ; do
-	mv "syncthing_${ver}_${arch}.deb" "$HOME/apt-dists/dists/syncthing/release/binary-$arch"
+	mv "syncthing_${ver}_${arch}.deb" "$HOME/apt-dists/dists/syncthing/$dist/binary-$arch"
 done
 
 popd >/dev/null
@@ -24,10 +30,10 @@ rm -r "$workdir"
 pushd "$HOME/apt-dists" >/dev/null
 
 echo Cleaning out old releases
-find dists/syncthing/release -name syncthing_\*.deb -mtime +30 -delete
+find "dists/syncthing/$dist" -name syncthing_\*.deb -mtime +30 -delete
 
 echo Generating and signing package archives
-for f in dists/syncthing/release/binary-* ; do
+for f in dists/syncthing/$dist/binary-* ; do
 	apt-ftparchive packages "$f" > "$f/Packages.new"
 	mv "$f/Packages.new"  "$f/Packages"
 	gzip -c "$f/Packages" > "$f/Packages.gz"
