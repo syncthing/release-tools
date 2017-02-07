@@ -7,7 +7,14 @@ echo Working dir is "$workdir"
 pushd "$workdir"
 
 dlbuild -match '\.snap' http://build.syncthing.net/job/syncthing-release/lastSuccessfulBuild
-channel=${1:-candidate}
+
+amd64snap=syncthing_*_amd64.snap
+channel=stable
+if [[ $amd64snap = *-rc.* ]] ; then
+	channel=candidate
+fi
+echo "Channel is $channel"
+
 
 for snap in *.snap ; do
 	snapcraft push "$snap"
