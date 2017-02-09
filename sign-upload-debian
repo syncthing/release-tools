@@ -21,7 +21,7 @@ fi
 echo Version $ver will go into $dist
 
 for arch in amd64 armel armhf i386 ; do
-	mv "syncthing_${ver}_${arch}.deb" "$HOME/apt-dists/dists/syncthing/$dist/binary-$arch"
+	mv "syncthing_${ver}_${arch}.deb" "$HOME/apt-dists/pool"
 done
 
 popd >/dev/null
@@ -30,13 +30,29 @@ rm -r "$workdir"
 pushd "$HOME/apt-dists" >/dev/null
 
 echo Cleaning out old releases
-find "dists/syncthing/$dist" -name syncthing_\*.deb -mtime +30 -delete
+find "pool" -name syncthing_\*.deb -mtime +60 -delete
 
 echo Generating and signing package archives
-for f in dists/syncthing/$dist/binary-* ; do
-	apt-ftparchive packages "$f" > "$f/Packages.new"
-	mv "$f/Packages.new"  "$f/Packages"
-	gzip -c "$f/Packages" > "$f/Packages.gz"
+shopt -s nullglob
+
+for arch in i386 amd64 arm64 armel armhf ; do
+	for chan in release stable ; do
+		path="dists/syncthing/$chan/binary-$arch"
+		pushd "$path"
+		rm -f *
+		ln -s ../../../../pool/*.{[0-9],[0-9][0-9]}.{[0-9],[0-9][0-9]}_$arch.deb . || true
+		popd
+		dpkg-scanpackages -m "$path" > "$path/Packages"
+		gzip -c "$path/Packages" > "$path/Packages.gz"
+	done
+
+	path="dists/syncthing/candidate/binary-$arch"
+	pushd "$path"
+	rm -f *
+	ln -s ../../../../pool/*_$arch.deb . || true
+	popd
+	dpkg-scanpackages -m "$path" > "$path/Packages"
+	gzip -c "$path/Packages" > "$path/Packages.gz"
 done
 
 apt-ftparchive -c Releases.conf release dists/syncthing | gpg --clearsign > dists/syncthing/InRelease
@@ -44,5 +60,5 @@ apt-ftparchive -c Releases.conf release dists/syncthing > dists/syncthing/Releas
 gpg --detach-sign --yes -a -o dists/syncthing/Release.gpg dists/syncthing/Release
 
 echo Uploading new distribution
-rsync -va --delete --rsh="$RSYNC_RSH_CMD" dists/ "$RELEASE_ROOT/dists/"
+rsync -va --delete --rsh="$RSYNC_RSH_CMD" ./ "$RELEASE_ROOT/"
 
