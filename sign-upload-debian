@@ -1,6 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
+archs=(amd64 armel armhf i386 arm64)
+
 export TMPDIR=/var/tmp
 workdir=$(mktemp -d)
 echo Working dir is "$workdir"
@@ -20,7 +22,7 @@ fi
 
 echo Version $ver will go into $dist
 
-for arch in amd64 armel armhf i386 ; do
+for arch in "${archs[@]}" ; do
 	mv "syncthing_${ver}_${arch}.deb" "$HOME/apt-dists/pool"
 done
 
@@ -35,7 +37,7 @@ find "pool" -name syncthing_\*.deb -mtime +60 -delete
 echo Generating and signing package archives
 shopt -s nullglob
 
-for arch in i386 amd64 arm64 armel armhf ; do
+for arch in "${archs[@]}" ; do
 	for chan in release stable ; do
 		path="dists/syncthing/$chan/binary-$arch"
 		pushd "$path"
