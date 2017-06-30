@@ -16,9 +16,9 @@ fi
 echo "Channel is $channel"
 
 for snap in *.snap ; do
-	snapcraft push "$snap"
-	latestRevision=$(snapcraft list-revisions syncthing | grep -v ^Rev | head -n1 | cut -d ' ' -f 1)
-	snapcraft release syncthing "$latestRevision" "$channel"
+	snapcraft push "$snap" --release "$channel"
+	#latestRevision=$(snapcraft list-revisions syncthing | grep -v ^Rev | head -n1 | cut -d ' ' -f 1)
+	#snapcraft release syncthing "$latestRevision" "$channel"
 done
 
 popd

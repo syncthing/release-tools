@@ -1,5 +1,6 @@
 #!/bin/bash
 set -euo pipefail
+shopt -s nullglob
 
 archs=(amd64 armel armhf i386 arm64)
 
@@ -14,13 +15,6 @@ dlbuild -match '\.deb' http://build.syncthing.net/job/syncthing-release/lastSucc
 ver=(syncthing_*_amd64.deb)
 ver="${ver#syncthing_}"
 ver="${ver%_amd64.deb}"
-
-dist="release"
-if [[ $ver == *-* ]] ; then
-	dist="candidate"
-fi
-
-echo Version $ver will go into $dist
 
 for arch in "${archs[@]}" ; do
 	mv "syncthing_${ver}_${arch}.deb" "$HOME/apt-dists/pool"
