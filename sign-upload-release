@@ -6,10 +6,7 @@ workdir=$(mktemp -d)
 echo Working dir is "$workdir"
 pushd "$workdir"
 
-dlbuild -match '\.tar\.gz|\.zip' http://build.syncthing.net/job/syncthing-release/lastSuccessfulBuild
-dlbuild -match '\.tar\.gz|\.zip' http://build.syncthing.net/job/syncthing-release-windows/lastSuccessfulBuild
-dlbuild -match '\.tar\.gz|\.zip' http://build.syncthing.net/job/syncthing-release-mac/lastSuccessfulBuild
-dlbuild -match '\.tar\.gz|\.zip' http://build.syncthing.net/job/syncthing-release-solaris/lastSuccessfulBuild
+cp "$1"/*.tar.gz "$1"/*.zip .
 ver=(syncthing-linux-amd64-*.tar.gz)
 ver="${ver#syncthing-linux-amd64-}"
 ver="${ver%.tar.gz}"

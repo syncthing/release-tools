@@ -10,7 +10,8 @@ echo Working dir is "$workdir"
 pushd "$workdir" >/dev/null
 
 echo Downloading release
-dlbuild -match '\.deb' http://build.syncthing.net/job/syncthing-release/lastSuccessfulBuild
+#dlbuild -match '\.deb' http://build.syncthing.net/job/syncthing-release/lastSuccessfulBuild
+cp "$1"/*.deb .
 
 ver=(syncthing_*_amd64.deb)
 ver="${ver#syncthing_}"

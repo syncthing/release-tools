@@ -6,7 +6,8 @@ workdir=$(mktemp -d)
 echo Working dir is "$workdir"
 pushd "$workdir"
 
-dlbuild -match '\.snap' http://build.syncthing.net/job/syncthing-release/lastSuccessfulBuild
+#dlbuild -match '\.snap' http://build.syncthing.net/job/syncthing-release/lastSuccessfulBuild
+cp "$1"/*.snap .
 
 amd64snap=syncthing_*_amd64.snap
 channel=stable
