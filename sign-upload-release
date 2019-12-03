@@ -12,32 +12,39 @@ ver="${ver#syncthing-linux-amd64-}"
 ver="${ver%.tar.gz}"
 echo Release version $ver
 
+sign() {
+	f="$1"
+	base="$2"
+	exe="$base/syncthing"
+	metadir=".metadata"
+	if [ -f "$base/syncthing.exe" ] ; then
+		exe="$base/syncthing.exe"
+		metadir="metadata"
+	fi
+	if [ -f "$exe" ] ; then
+		echo Signing "$base ($f)"
+		rm -rf "$base/$metadir"
+		mkdir -p "$base/$metadir"
+		( echo "$f"; cat "$exe" ) | stsigtool sign "$PRIVATE_KEY" > "$base/$metadir/release.sig"
+	fi
+}
+
 for f in *.tar.gz; do
 	base="${f%.tar.gz}"
 	tar zxf "$f"
-	if [ -f "$base/syncthing" ] ; then
-		echo Signing "$base"
-		mkdir "$base/.metadata"
-		stsigtool sign "$PRIVATE_KEY" "$base/syncthing" > "$base/syncthing.sig"
-		( echo "$f"; cat "$base/syncthing" ) | stsigtool sign "$PRIVATE_KEY" > "$base/.metadata/release.sig"
-		tar zcf "$f" "$base"
-		rm -rf "$base"
-		rm -rf syncthing
-	fi
+	sign "$f" "$base"
+	rm -f "$f"
+	tar zcf "$f" "$base"
+	rm -rf "$base"
 done
 
 for f in *.zip; do
 	base="${f%.zip}"
 	unzip -q "$f"
-	if [ -f "$base/syncthing.exe" ] ; then
-		echo Signing "$base"
-		mkdir "$base/metadata"
-		stsigtool sign "$PRIVATE_KEY" "$base/syncthing.exe" > "$base/syncthing.exe.sig"
-		( echo "$f"; cat "$base/syncthing.exe" ) | stsigtool sign "$PRIVATE_KEY" > "$base/metadata/release.sig"
-		rm -f "$f"
-		zip -q -r "$f" "$base"
-		rm -rf "$base"
-	fi
+	sign "$f" "$base"
+	rm -f "$f"
+	zip -q -r "$f" "$base"
+	rm -rf "$base"
 done
 
 files=(*.tar.gz *.zip)
