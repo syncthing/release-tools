@@ -1,5 +1,6 @@
 #!/bin/bash
 set -euo pipefail
+#set -x
 
 export TMPDIR=/var/tmp
 workdir=$(mktemp -d)
@@ -30,12 +31,19 @@ sign() {
 }
 
 for f in *.tar.gz; do
-	base="${f%.tar.gz}"
-	tar zxf "$f"
-	sign "$f" "$base"
-	rm -f "$f"
-	tar zcf "$f" "$base"
-	rm -rf "$base"
+	echo "$f"
+        case "$f" in
+	syncthing-source-*.tar.gz)
+		;;
+	*)
+		base="${f%.tar.gz}"
+		tar zxf "$f"
+		sign "$f" "$base"
+		rm -f "$f"
+		tar zcf "$f" "$base"
+		rm -rf "$base"
+	;;
+	esac
 done
 
 for f in *.zip; do

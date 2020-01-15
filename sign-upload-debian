@@ -5,24 +5,26 @@ shopt -s nullglob
 archs=(amd64 armel armhf i386 arm64)
 
 export TMPDIR=/var/tmp
-workdir=$(mktemp -d)
-echo Working dir is "$workdir"
-pushd "$workdir" >/dev/null
 
-echo Downloading release
-#dlbuild -match '\.deb' http://build.syncthing.net/job/syncthing-release/lastSuccessfulBuild
-cp "$1"/*.deb .
+if [[ ! -z ${1:-} ]] ; then
+	workdir=$(mktemp -d)
+	echo Working dir is "$workdir"
+	pushd "$workdir" >/dev/null
 
-ver=(syncthing_*_amd64.deb)
-ver="${ver#syncthing_}"
-ver="${ver%_amd64.deb}"
+	echo Downloading release
+	cp "$1"/*.deb .
 
-for arch in "${archs[@]}" ; do
-	mv "syncthing_${ver}_${arch}.deb" "$HOME/apt-dists/pool"
-done
+	ver=(syncthing_*_amd64.deb)
+	ver="${ver#syncthing_}"
+	ver="${ver%_amd64.deb}"
 
-popd >/dev/null
-rm -r "$workdir"
+	for arch in "${archs[@]}" ; do
+		mv "syncthing_${ver}_${arch}.deb" "$HOME/apt-dists/pool"
+	done
+
+	popd >/dev/null
+	rm -r "$workdir"
+fi
 
 pushd "$HOME/apt-dists" >/dev/null
 
@@ -53,8 +55,11 @@ for arch in "${archs[@]}" ; do
 done
 
 apt-ftparchive -c Releases.conf release dists/syncthing | gpg --clearsign > dists/syncthing/InRelease
+gzip -c dists/syncthing/InRelease > dists/syncthing/InRelease.gz
 apt-ftparchive -c Releases.conf release dists/syncthing > dists/syncthing/Release
+gzip -c dists/syncthing/Release > dists/syncthing/Release.gz
 gpg --detach-sign --yes -a -o dists/syncthing/Release.gpg dists/syncthing/Release
+gzip -c dists/syncthing/Release.gpg > dists/syncthing/Release.gpg.gz
 
 echo Uploading new distribution
 rsync -va --delete --rsh="$RSYNC_RSH_CMD" ./ "$RELEASE_ROOT/"
