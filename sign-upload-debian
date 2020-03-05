@@ -39,7 +39,7 @@ for arch in "${archs[@]}" ; do
 		path="dists/syncthing/$chan/binary-$arch"
 		pushd "$path"
 		rm -f *
-		ln -s ../../../../pool/*.{[0-9],[0-9][0-9]}.{[0-9],[0-9][0-9]}_$arch.deb . || true
+		ln -s ../../../../pool/*_{[0-9],[0-9][0-9]}.{[0-9],[0-9][0-9]}.{[0-9],[0-9][0-9]}_$arch.deb . || true
 		popd
 		dpkg-scanpackages -m "$path" > "$path/Packages"
 		gzip -c "$path/Packages" > "$path/Packages.gz"
