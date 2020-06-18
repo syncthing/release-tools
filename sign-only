@@ -30,7 +30,11 @@ for f in *.tar.gz; do
 		base="${f%.tar.gz}"
 		tar zxf "$f"
 		if [[ $replacePlus != "" ]] ; then
-			newbase=${base/+*/$replacePlus}
+			sep="."
+			if [[ $base != *-* ]] ; then
+				sep="-"
+			fi
+			newbase=${base/+*/$sep$replacePlus}
 			mv "$base" "$newbase"
 			base="$newbase"
 			f="${newbase}.tar.gz"
@@ -47,7 +51,11 @@ for f in *.zip; do
 	base="${f%.zip}"
 	unzip -q "$f"
 	if [[ $replacePlus != "" ]] ; then
-		newbase=${base/+*/$replacePlus}
+		sep="."
+		if [[ $base != *-* ]] ; then
+			sep="-"
+		fi
+		newbase=${base/+*/$sep$replacePlus}
 		mv "$base" "$newbase"
 		base="$newbase"
 		f="${newbase}.zip"
@@ -57,4 +65,3 @@ for f in *.zip; do
 	zip -q -r "$f" "$base"
 	rm -rf "$base"
 done
-
