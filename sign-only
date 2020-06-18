@@ -33,6 +33,7 @@ for f in *.tar.gz; do
 			newbase=${base/+*/$replacePlus}
 			mv "$base" "$newbase"
 			base="$newbase"
+			f="${newbase}.tar.gz"
 		fi
 		sign "$f" "$base"
 		rm -f "$f"
@@ -49,6 +50,7 @@ for f in *.zip; do
 		newbase=${base/+*/$replacePlus}
 		mv "$base" "$newbase"
 		base="$newbase"
+		f="${newbase}.zip"
 	fi
 	sign "$f" "$base"
 	rm -f "$f"
