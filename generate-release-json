@@ -1,0 +1,48 @@
+#!/bin/bash
+set -euo pipefail
+
+baseURL="$1"
+ver=(syncthing-linux-amd64-*.tar.gz)
+ver="${ver#syncthing-linux-amd64-}"
+ver="${ver%.tar.gz}"
+
+header() {
+    cat <<EOT
+[
+  {
+    "prerelease": true,
+    "tag_name": "$ver",
+    "assets": [
+EOT
+}
+
+asset() {
+    name="$1"
+    cat <<EOT
+    {
+            "name": "$name",
+            "url": "${baseURL}${name}",
+            "browser_download_url": "${baseURL}${name}"
+    }
+EOT
+}
+
+footer() {
+    cat <<EOT
+    ]
+  }
+]
+EOT
+}
+
+header
+first=1
+for f in *.tar.gz *.zip; do
+    if [[ $first == 1 ]] ; then
+        first=0
+    else
+        echo ,
+    fi
+    asset "$f"
+done
+footer
