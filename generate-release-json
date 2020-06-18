@@ -21,9 +21,9 @@ asset() {
     name="$1"
     cat <<EOT
     {
-            "name" : "$name",
-            "url" : "${baseURL}${name}",
-            "browser_download_url" : "${baseURL}${name}"
+            "name": "$name",
+            "url": "${baseURL}${name}",
+            "browser_download_url": "${baseURL}${name}"
     }
 EOT
 }
@@ -36,25 +36,14 @@ footer() {
 EOT
 }
 
-sign() {
-	f="$1"
-	base="$2"
-	exe="$base/syncthing"
-	metadir=".metadata"
-	if [ -f "$base/syncthing.exe" ] ; then
-		exe="$base/syncthing.exe"
-		metadir="metadata"
-	fi
-	if [ -f "$exe" ] ; then
-		echo Signing "$base ($f)"
-		rm -rf "$base/$metadir"
-		mkdir -p "$base/$metadir"
-		( echo "$f"; cat "$exe" ) | stsigtool sign "$PRIVATE_KEY" > "$base/$metadir/release.sig"
-	fi
-}
-
 header
+first=1
 for f in *.tar.gz *.zip; do
+    if [[ $first == 1 ]] ; then
+        first=0
+    else
+        echo ,
+    fi
     asset "$f"
 done
 footer
