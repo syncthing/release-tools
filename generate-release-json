@@ -1,0 +1,60 @@
+#!/bin/bash
+set -euo pipefail
+
+baseURL="$1"
+ver=(syncthing-linux-amd64-*.tar.gz)
+ver="${ver#syncthing-linux-amd64-}"
+ver="${ver%.tar.gz}"
+echo Release version $ver
+
+header() {
+    cat <<EOT
+[
+  {
+    "prerelease": true,
+    "tag_name": "$ver",
+    "assets": [
+EOT
+}
+
+asset() {
+    name="$1"
+    cat <<EOT
+    {
+            "name" : "$name",
+            "url" : "${baseURL}${name}",
+            "browser_download_url" : "${baseURL}${name}"
+    }
+EOT
+}
+
+footer() {
+    cat <<EOT
+    ]
+  }
+]
+EOT
+}
+
+sign() {
+	f="$1"
+	base="$2"
+	exe="$base/syncthing"
+	metadir=".metadata"
+	if [ -f "$base/syncthing.exe" ] ; then
+		exe="$base/syncthing.exe"
+		metadir="metadata"
+	fi
+	if [ -f "$exe" ] ; then
+		echo Signing "$base ($f)"
+		rm -rf "$base/$metadir"
+		mkdir -p "$base/$metadir"
+		( echo "$f"; cat "$exe" ) | stsigtool sign "$PRIVATE_KEY" > "$base/$metadir/release.sig"
+	fi
+}
+
+header
+for f in *.tar.gz *.zip; do
+    asset "$f"
+done
+footer
