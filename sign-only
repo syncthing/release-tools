@@ -1,10 +1,9 @@
 #!/bin/bash
 set -euo pipefail
 
-ver=(syncthing-linux-amd64-*.tar.gz)
-ver="${ver#syncthing-linux-amd64-}"
-ver="${ver%.tar.gz}"
-echo Release version $ver
+# If an argument is given we replace everything after the plus sign with
+# that argument. Used for nightly version naming.
+replacePlus="${1:-}"
 
 sign() {
 	f="$1"
@@ -30,6 +29,11 @@ for f in *.tar.gz; do
 	*)
 		base="${f%.tar.gz}"
 		tar zxf "$f"
+		if [[ $replacePlus != "" ]] ; then
+			newbase=${base/+*/$replacePlus}
+			mv "$base" "$newbase"
+			base="$newbase"
+		fi
 		sign "$f" "$base"
 		rm -f "$f"
 		tar zcf "$f" "$base"
