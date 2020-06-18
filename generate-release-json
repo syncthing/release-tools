@@ -5,6 +5,7 @@ baseURL="$1"
 ver=(syncthing-linux-amd64-*.tar.gz)
 ver="${ver#syncthing-linux-amd64-}"
 ver="${ver%.tar.gz}"
+ver="${ver/+/.nightly.}"
 
 header() {
     cat <<EOT
