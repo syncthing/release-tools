@@ -1,10 +1,6 @@
 #!/bin/bash
 set -euo pipefail
 
-# If an argument is given we replace everything after the plus sign with
-# that argument. Used for nightly version naming.
-replacePlus="${1:-}"
-
 sign() {
 	f="$1"
 	base="$2"
@@ -29,16 +25,6 @@ for f in *.tar.gz; do
 	*)
 		base="${f%.tar.gz}"
 		tar zxf "$f"
-		if [[ $replacePlus != "" ]] ; then
-			sep="."
-			if [[ $base != *-* ]] ; then
-				sep="-"
-			fi
-			newbase=${base/+*/$sep$replacePlus}
-			mv "$base" "$newbase"
-			base="$newbase"
-			f="${newbase}.tar.gz"
-		fi
 		sign "$f" "$base"
 		rm -f "$f"
 		tar zcf "$f" "$base"
@@ -50,16 +36,6 @@ done
 for f in *.zip; do
 	base="${f%.zip}"
 	unzip -q "$f"
-	if [[ $replacePlus != "" ]] ; then
-		sep="."
-		if [[ $base != *-* ]] ; then
-			sep="-"
-		fi
-		newbase=${base/+*/$sep$replacePlus}
-		mv "$base" "$newbase"
-		base="$newbase"
-		f="${newbase}.zip"
-	fi
 	sign "$f" "$base"
 	rm -f "$f"
 	zip -q -r "$f" "$base"
