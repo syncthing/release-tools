@@ -45,6 +45,11 @@ done
 for f in *.zip; do
 	base="${f%.zip}"
 	unzip -q "$f"
+	if [[ $replacePlus != "" ]] ; then
+		newbase=${base/+*/$replacePlus}
+		mv "$base" "$newbase"
+		base="$newbase"
+	fi
 	sign "$f" "$base"
 	rm -f "$f"
 	zip -q -r "$f" "$base"
