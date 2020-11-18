@@ -1,0 +1,14 @@
+#!/bin/bash
+set -euo pipefail
+
+pushd "$1"
+
+ver=(syncthing-linux-amd64-*.tar.gz)
+ver="${ver#syncthing-linux-amd64-}"
+ver="${ver%.tar.gz}"
+echo Release version $ver
+
+echo *.asc *.tar.gz *.zip | xargs -n1 -P4 relup syncthing/syncthing "$ver" 
+
+popd
+
