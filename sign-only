@@ -19,7 +19,7 @@ sign() {
 	fi
 }
 
-for f in *.tar.gz; do
+for f in syncthing*.tar.gz; do
         case "$f" in
 	syncthing-source-*.tar.gz)
 		;;
@@ -34,7 +34,7 @@ for f in *.tar.gz; do
 	esac
 done
 
-for f in *.zip; do
+for f in syncthing*.zip; do
 	base="${f%.zip}"
 	unzip -q "$f"
 	sign "$f" "$base"
